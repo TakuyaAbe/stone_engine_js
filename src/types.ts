@@ -99,6 +99,13 @@ export interface FontSpec {
    * 指定する（大きくすると、絵文字が列の手前に動く）。
    */
   descent?: number;
+  /**
+   * ベースラインのずらし（フォントサイズ × 文字種スケールに対する比）。正の値で字形を上に、負の値で下に動かす（CSS の baseline-shift と同じ向き）。
+   * 和文と欧文でフォントを合成したとき、欧文のベースラインを和文に合わせるのに使う。既定値は 0。
+   * 横書きは字形を上下に、縦書きで 90 度回す欧文は字形の上の向き（右）に動かす。縦書きで正立する文字（和文・絵文字・縦中横）には効かない。
+   * 動かすのは描く位置（run.position）だけで、矩形・折り返し・行送り・当たり判定・下線の位置は変わらない。
+   */
+  baselineShift?: number;
 }
 
 export interface ResolvedFont {
@@ -110,6 +117,7 @@ export interface ResolvedFont {
   style: FontStyle;
   ascent?: number;
   descent?: number;
+  baselineShift: number;
 }
 
 export interface FontMetrics {

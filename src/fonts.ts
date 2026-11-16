@@ -58,6 +58,7 @@ export function resolveFonts(fonts?: StoneOptions["fonts"]): ResolvedFont[] {
       scale: spec?.scale ?? base.scale ?? 1,
       weight: spec?.weight ?? base.weight ?? "normal",
       style: spec?.style ?? base.style ?? "normal",
+      baselineShift: spec?.baselineShift ?? base.baselineShift ?? 0,
     };
     const ascent = spec?.ascent ?? base.ascent ?? (script === "japanese" ? JAPANESE_ASCENT_RATIO : undefined);
     const descent =
@@ -191,6 +192,14 @@ export class FontManager {
       ascent: font.ascent !== undefined ? scaled * font.ascent : measured.ascent,
       descent: font.descent !== undefined ? scaled * font.descent : measured.descent,
     };
+  }
+
+  /**
+   * ベースラインのずらし（px、上向きが正）。変種（太字・斜体）は通常のフォントの値を使う。
+   */
+  baselineShift(fontId: number, size: number): number {
+    const shift = this.font(scriptIndexOfFontId(fontId)).baselineShift;
+    return shift ? this.scaledSize(fontId, size) * shift : 0;
   }
 
   /** アセント（px）。 */
