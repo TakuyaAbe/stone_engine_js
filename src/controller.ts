@@ -4,6 +4,11 @@ controller.ts — ブラウザでテキストをレイアウトし続けるた�
 - レイアウトは同期的に行う（フォールバックフォントのメトリクスでもまず描く）。
 - Web フォントが未読み込みなら document.fonts.load() で読み込み、完了後に計測キャッシュを捨ててレイアウトし直す。
 - 以後もフォントの読み込み完了（loadingdone）を監視してレイアウトし直す。
+- WebKit（Safari）は、CSS の @font-face で始まった読み込みに loading / loadingdone を出さず、読み込み中でも
+  document.fonts.check() が true を返すことがある。そのため、フォントの読み込み中（document.fonts.status が "loading"）や
+  ページの読み込み中（document.readyState が "complete" でない）に組んだときは、ページの load と document.fonts.ready を
+  待ってからもう一度計測し直す（Google Fonts の CSS が届く前に組むと、フォールバックフォントの送り幅が計測キャッシュに残り続けて
+  文字が重なっていた）。
 React フックと mountStoneText() の両方がこれを使う。
 */
 
@@ -63,6 +68,8 @@ export class StoneTextController {
   private readonly onLayout: (ctx: StoneContext) => void;
   private input: ControllerInput | null = null;
   private pendingKey: string | null = null;
+  /** document.fonts.ready を待っているところかどうか（重ねて待たない）。 */
+  private waitingReady = false;
   private disposed = false;
   private readonly fontsListener: (() => void) | null = null;
 
@@ -110,6 +117,7 @@ export class StoneTextController {
   /** 未読み込みの Web フォントがあれば読み込み、完了後にレイアウトし直す。 */
   private ensureFonts(ctx: StoneContext, text: string): void {
     if (typeof document === "undefined" || !document.fonts?.load) return;
+    this.waitForPendingFonts();
     const specs = new Set<string>();
     for (const font of ctx.fonts) specs.add(cssFontString(font, 16));
     const sample = text.length > 0 ? text : "あ";
@@ -132,6 +140,32 @@ export class StoneTextController {
         if (this.pendingKey === key) this.pendingKey = null;
         this.invalidate();
         this.relayout();
+      });
+  }
+
+  /**
+   * フォントやページがまだ読み込み中なら、ページの load と document.fonts.ready を待ってから計測し直す。
+   * loadingdone を出さない WebKit でも、読み込みが終わったあとの送り幅で組み直すため。待っている間に別のフォントの読み込みが
+   * 始まっていれば、もう一度待つ。
+   */
+  private waitForPendingFonts(): void {
+    if (this.waitingReady) return;
+    const fonts = document.fonts;
+    const pageLoading = document.readyState !== "complete" && typeof window !== "undefined";
+    if (fonts.status !== "loading" && !pageLoading) return;
+    this.waitingReady = true;
+    const pageLoaded = pageLoading
+      ? new Promise<void>((resolve) => window.addEventListener("load", () => resolve(), { once: true }))
+      : Promise.resolve();
+    pageLoaded
+      .then(() => fonts.ready)
+      .catch(() => undefined)
+      .then(() => {
+        this.waitingReady = false;
+        if (this.disposed) return;
+        this.invalidate();
+        this.relayout();
+        if (fonts.status === "loading") this.waitForPendingFonts();
       });
   }
 
