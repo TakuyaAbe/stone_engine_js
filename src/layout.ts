@@ -402,8 +402,7 @@ export class Layouter {
     }
 
     if (ctx.isClockwise(run)) {
-      // 90 度回す欧文の字形の上は右を向くので、ベースラインのずらしは右に入れる（矩形は列のまま）
-      run.position = { x: this.x + fm.descent(run.fontId, size) + fm.baselineShift(run.fontId, size), y: this.y };
+      run.position = { x: this.x + fm.descent(run.fontId, size), y: this.y };
       run.frame = { x: this.x, y: this.y, width: size, height: this.spaced(runId, run.advance) };
       return;
     }

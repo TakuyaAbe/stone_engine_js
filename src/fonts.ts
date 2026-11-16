@@ -195,7 +195,7 @@ export class FontManager {
   }
 
   /**
-   * ベースラインのずらし（px、上向きが正）。変種（太字・斜体）は通常のフォントの値を使う。
+   * 横書きのベースラインのずらし（px、上向きが正）。変種（太字・斜体）は通常のフォントの値を使う。
    */
   baselineShift(fontId: number, size: number): number {
     const shift = this.font(scriptIndexOfFontId(fontId)).baselineShift;

@@ -32,16 +32,11 @@ describe("baselineShift", () => {
     expect(runOf(ctx, "A").run.position.y).toBeCloseTo(runOf(base, "A").run.position.y + LATIN_EM * 0.2);
   });
 
-  it("moves rotated latin glyphs to the right in vertical writing, leaving upright glyphs", () => {
+  it("does nothing in vertical writing", () => {
     const base = lay("和文Abc和文12", { direction: "tbRl" });
     const ctx = lay("和文Abc和文12", { ...SHIFTED, direction: "tbRl" });
-    const a0 = runOf(base, "A").run;
-    const a1 = runOf(ctx, "A").run;
-    expect(a1.position.x).toBeCloseTo(a0.position.x + LATIN_EM * 0.1);
-    expect(a1.position.y).toBeCloseTo(a0.position.y);
-    expect(a1.frame).toEqual(a0.frame);
-    // 縦中横の数字は正立なのでずらさない
-    expect(runOf(ctx, "1").run.position).toEqual(runOf(base, "1").run.position);
+    expect(ctx.runs.map((r) => r.position)).toEqual(base.runs.map((r) => r.position));
+    expect(ctx.runs.map((r) => r.frame)).toEqual(base.runs.map((r) => r.frame));
   });
 
   it("uses the shift of the regular font for bold variants", () => {
