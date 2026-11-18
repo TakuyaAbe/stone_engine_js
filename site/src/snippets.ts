@@ -201,7 +201,7 @@ export const PROPS: PropRow[] = [
   { name: "dividesByWords", def: "true", desc: "単語の途中で改行しない" },
   { name: "allowsTateChuYoko", def: "true", desc: "縦書きで 2 桁以下の数字を正体にする（縦中横）" },
   { name: "adjustsFontSizeToFitWidth / minimumScaleFactor", def: "false / 0", desc: "収まらないときにフォントを縮小する" },
-  { name: "fonts", def: "", desc: "文字種（latin / japanese / emoji）ごとの { family, scale, weight, style, ascent, descent }" },
+  { name: "fonts", def: "", desc: "文字種（latin / japanese / emoji）ごとの { family, scale, weight, style, ascent, descent, baselineShift }" },
   { name: "width / height", def: '横書き "container" / "auto"、縦書き "auto" / "auto"', desc: 'レイアウト領域。数値（px）、"auto"（制限なし）、"container"（コンポーネントの大きさ）。縦書きの幅は内容に合わせて左に伸びる。行送り方向（横書きは高さ、縦書きは幅）に収まらない行は表示せず、続きがあるときは最後に表示する文字を省略記号（横書き「…」、縦書き「︙」）にする。縦書きの 2 桁の縦中横（1em より少し広い）は、列の 1em の幅に収まっているものとして扱う（端の列では、数字が領域からわずかにはみ出すことがある）。1 桁の縦中横だけの列も、列の位置と "auto" のときの幅は、数字の幅ではなく列の 1em の幅で決める' },
   { name: "color", def: "currentColor", desc: "文字色" },
   { name: "showFrames", def: "false", desc: "各文字の占有矩形を描く（デバッグ用）" },

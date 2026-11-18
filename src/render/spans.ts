@@ -78,6 +78,14 @@ export function columnLeft(ctx: StoneContext, run: Run): number {
   return (first.x + last.x + last.width - ctx.adjustFontSize) * 0.5;
 }
 
+/**
+ * 横書きの run が並ぶ行のベースライン。矩形の上端はベースラインからアセントだけ上なので、そこから戻す
+ * （run.position の y は、fonts の baselineShift でずらした字形の位置なので使わない）。
+ */
+function lineBaseline(ctx: StoneContext, run: Run): number {
+  return run.frame.y + ctx.fontManager.ascent(run.fontId, ctx.adjustFontSize);
+}
+
 /** 範囲の文字を行ごとにまとめたもの。両端の空白と、非表示の文字・改行は含まない。 */
 interface SpanSegment {
   first: Run;
@@ -114,7 +122,7 @@ export function spanRects(ctx: StoneContext, spans: readonly StoneSpan[], spanIn
   return spanSegments(ctx, stacks, spanIndex).map(({ first, last }) => {
     if (ctx.direction === "lrTb") {
       const x = first.frame.x;
-      return { x, y: first.position.y - ascent, width: last.frame.x + last.frame.width - x, height: size };
+      return { x, y: lineBaseline(ctx, first) - ascent, width: last.frame.x + last.frame.width - x, height: size };
     }
     const y = first.frame.y;
     return { x: columnLeft(ctx, first), y, width: size, height: last.frame.y + last.frame.height - y };
@@ -150,7 +158,7 @@ export function decorationRects(ctx: StoneContext, spans: readonly StoneSpan[] |
         const offset = kind === "underline" ? size - thickness : (size - thickness) * 0.5;
         if (ctx.direction === "lrTb") {
           const x = first.frame.x;
-          const y = first.position.y - ascent + offset;
+          const y = lineBaseline(ctx, first) - ascent + offset;
           rects.push({ spanIndex, kind, color, x, y, width: last.frame.x + last.frame.width - x, height: thickness });
         } else {
           const y = first.frame.y;

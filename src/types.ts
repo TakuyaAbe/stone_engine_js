@@ -99,6 +99,16 @@ export interface FontSpec {
    * 指定する（大きくすると、絵文字が列の手前に動く）。
    */
   descent?: number;
+  /**
+   * 横書きのベースラインのずらし（フォントサイズ × 文字種スケールに対する比）。正の値で字形を上に、負の値で下に動かす
+   * （CSS の baseline-shift と同じ向き）。既定値は 0。
+   * 横書きでは 1 行の文字がすべて行のベースラインを共有するので、ascent / descent では和文に対して欧文だけを上下させられない。
+   * 付属の欧文をベースラインより下に作っている和文フォント（Hachi Maru Pop など）や、字形がベースラインから浮いている欧文フォント
+   * （Press Start 2P など）を合成するときに、これで合わせる。
+   * 縦書きには効かない（90 度回す欧文は、列の左端から descent だけ右に置くので、列の中の位置は descent で調整する）。
+   * 動かすのは描く位置（run.position）だけで、矩形・折り返し・行送り・当たり判定・下線の位置は変わらない。
+   */
+  baselineShift?: number;
 }
 
 export interface ResolvedFont {
@@ -110,6 +120,7 @@ export interface ResolvedFont {
   style: FontStyle;
   ascent?: number;
   descent?: number;
+  baselineShift: number;
 }
 
 export interface FontMetrics {

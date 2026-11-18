@@ -374,7 +374,8 @@ export class Layouter {
     // 約物の詰めは字間を含めない送り幅で決め、その後ろに字間を足す。stone の行頭の始め括弧も、ここで半角にする
     // （折り返しの判定が、詰めた後の長さで次の文字が入るかどうかを見るように）
     const trim = this.punctuationTrim(runId, runId === this.lineStartRunId);
-    run.position = { x: this.x - run.advance * trim.shift, y: this.y };
+    // ベースラインのずらし（fonts の baselineShift）は描く位置だけに入れる。矩形は行のベースラインのまま
+    run.position = { x: this.x - run.advance * trim.shift, y: this.y - fm.baselineShift(run.fontId, size) };
     run.frame = {
       x: this.x,
       y: this.y - fm.ascent(run.fontId, size),
